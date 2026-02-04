@@ -6,3 +6,4 @@ six>=1.15
 tqdm
 tzlocal>=4.0
 questionary>=1.10
+zipp>=3.19.1 # not directly required, pinned by Snyk to avoid a vulnerability
