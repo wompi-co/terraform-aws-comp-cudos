@@ -1,168 +1,202 @@
-# Cloud Intelligence Dashboards (CUDOS Framework)
-
-[![PyPI version](https://badge.fury.io/py/cid-cmd.svg)](https://badge.fury.io/py/cid-cmd)
-
-## Welcome to Cloud Intelligence Dashboards (CUDOS Framework) automation repository
-This repository contains CloudFormation templates, Terraform modules, and a Command Line tool (cid-cmd) for managing various dashboards provided in AWS Well Architected LAB [Cloud Intelligence Dashboards](https://www.wellarchitectedlabs.com/cloud-intelligence-dashboards/).
-
-There are several ways we can manage dashboards:
-1. [CloudFormation Template](./cfn-templates/cid-cfn.yml) (using cid-cmd tool in lambda)
-2. [Terraform module](./terraform-modules/cid-dashboards/README.md) (wrapper around CloudFormation Template)
-3. Using cid-cmd tool from command line
-
-We recommend cid-cmd tool via [AWS CloudShell](https://console.aws.amazon.com/cloudshell/home).
-
-## Supported dashboards
 ---
-| Dashboard documentation | Demo URL | Prerequisites URL |
-| --- | --- | --- |
-| [CUDOS Dashboard](https://catalog.workshops.aws/awscid/en-US/dashboards/foundational/cudos-cid-kpi#cudos-dashboard) | [demo](https://cid.workshops.aws.dev/demo?dashboard=cudos) | [link](https://aws.amazon.com/aws-cost-management/aws-cost-and-usage-reporting) |
-| [Cost Intelligence Dashboard](https://catalog.workshops.aws/awscid/en-US/dashboards/foundational/cudos-cid-kpi#cost-intelligence-dashboard-(cid)) | [demo](https://cid.workshops.aws.dev/demo?dashboard=cost_intelligence_dashboard) | [link](https://aws.amazon.com/aws-cost-management/aws-cost-and-usage-reporting) |
-| [Trusted Advisor Organisation (TAO) Dashboard](https://catalog.workshops.aws/awscid/en-US/dashboards/advanced/trusted-advisor) | [demo](https://cid.workshops.aws.dev/demo?dashboard=tao-dashboard) | [link](https://catalog.workshops.aws/awscid/en-US/dashboards/advanced/trusted-advisor/prerequisites) |
-| [Trends Dashboard](https://catalog.workshops.aws/awscid/en-US/dashboards/additional/trends) | [demo](https://cid.workshops.aws.dev/demo?dashboard=trends-dashboard) | [link](https://aws.amazon.com/aws-cost-management/aws-cost-and-usage-reporting) |
-| [KPI Dashboard](https://catalog.workshops.aws/awscid/en-US/dashboards/foundational/cudos-cid-kpi#kpi-dashboard) | [demo](https://cid.workshops.aws.dev/demo?dashboard=kpi) | [link](https://aws.amazon.com/aws-cost-management/aws-cost-and-usage-reporting) |
-| [Compute Optimizer Dashboard](https://catalog.workshops.aws/awscid/en-US/dashboards/advanced/compute-optimizer) | [demo](https://cid.workshops.aws.dev/demo?dashboard=compute-optimizer-dashboard) | [link](https://catalog.workshops.aws/awscid/en-US/dashboards/advanced/compute-optimizer/prerequisites) |
-| [Cost Anomaly Dashboard](https://catalog.workshops.aws/awscid/en-US/dashboards/advanced/cost-anomaly) | [demo](https://cid.workshops.aws.dev/demo?dashboard=aws-cost-anomalies) | [link](https://catalog.workshops.aws/awscid/en-US/dashboards/advanced/cost-anomaly/prerequisites) |
-| [Data Transfer Cost Dashboard](https://catalog.workshops.aws/awscid/en-US/dashboards/additional/data-transfer) | [demo](https://cid.workshops.aws.dev/demo?dashboard=datatransfer-cost-analysis-dashboard) | [link](https://catalog.workshops.aws/awscid/en-US/dashboards/foundational/cudos-cid-kpi) |
+title: "terraform-aws-comp-cudos"
+generated_by: archai-docgen
+generated_at: "2026-07-01T01:12:47.008Z"
+repo_type: "Terraform"
+primary_language: "Python"
+framework: "boto3"
+---
 
-See more dashboards on the [workshop page](https://catalog.workshops.aws/awscid/en-US/dashboards).
+<div style="margin-bottom:15px">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://cdn.wompi.com/brand_wompi/logos/logo-secondary.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://cdn.wompi.com/brand_wompi/logos/logo-primary.svg">
+  <img alt="Wompi Logo" src="https://cdn.wompi.com/brand_wompi/logos/logo-primary.svg" width="150">
+</picture>
+</div>
 
-## Before you start
-1. :heavy_exclamation_mark: Complete the prerequisites for respective dashboard (see above).
-2. :heavy_exclamation_mark: [Specifying a Query Result Location Using a Workgroup](https://docs.aws.amazon.com/athena/latest/ug/querying.html#query-results-specify-location-workgroup)
-3. :heavy_exclamation_mark: Make sure QuickSight [Enterprise edition](https://aws.amazon.com/premiumsupport/knowledge-center/quicksight-enterprise-account/) is activated.
+![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
+![HCL](https://img.shields.io/badge/HCL-%23844FBA.svg?style=for-the-badge&logo=terraform&logoColor=white)
 
-## Command line tool cid-cmd
+# terraform-aws-comp-cudos
 
-#### Demo: Deployment of Dashboards with cid-cmd tool
 
-   [![asciicast](https://asciinema.org/a/467770.svg)](https://asciinema.org/a/467770)
 
-#### Install
+This repository provides three Terraform modules for deploying AWS Cloud Intelligence Dashboards (CUDOS framework) in single or multi-account AWS Organizations environments. The modules automate Cost and Usage Report (CUR) setup with cross-account S3 replication and deploy pre-built QuickSight dashboards for cost optimization, KPI tracking, Trusted Advisor insights, and Compute Optimizer recommendations.
 
-1. Launch [AWS CloudShell](https://console.aws.amazon.com/cloudshell/home) or your local shell
+The `cur-setup-source` module creates CUR in payer accounts with S3 replication to a central aggregation bucket, `cur-setup-destination` provisions the aggregation bucket in the data collection account, and `cid-dashboards` deploys QuickSight dashboards via a CloudFormation wrapper that invokes the cid-cmd CLI tool through Lambda-backed custom resources.
 
-    Automation requires Python 3
+## Key Features
 
-2. Make sure you have the latest pip package installed
-    ```bash
-    python3 -m ensurepip --upgrade
-    ```
+- **Multi-Account CUR Aggregation**: S3 replication from multiple payer accounts to central bucket
+- **Three Independent Modules**: Separate source, destination, and dashboard deployment modules
+- **Pre-Built QuickSight Dashboards**: CUDOS v5, Cost Intelligence, KPI, TAO, and Compute Optimizer
+- **Automated Athena Integration**: Glue crawler and database setup with daily metadata refresh
+- **Secure S3 Configuration**: Versioning, public access blocking, TLS 1.2+ enforcement
+- **CloudFormation Wrapper**: Lambda-based cid-cmd automation for dashboard lifecycle
+- **KMS Encryption Support**: Optional customer-managed keys for CUR data (experimental)
+- **Version Locking**: Git ref support for stable module deployment
 
-4. Install CID Python automation PyPI package
-    ```bash
-    pip3 install --upgrade cid-cmd
-    ```
+## Usage
 
-#### Dasbhoard Deployment
+> [!NOTE]
+> All modules require a `us-east-1` provider alias due to AWS CUR API requirements. The modules work independently but are designed to be deployed together for multi-account CUR aggregation.
 
-```bash
-cid-cmd deploy
+### Basic Example - Destination Account
+
+Provisions the aggregation S3 bucket in the data collection account that receives replicated CUR data from payer accounts.
+
+```terraform
+provider "aws" {
+  region = "us-west-2"
+  alias  = "data_collection"
+}
+
+provider "aws" {
+  region = "us-east-1"
+  alias  = "data_collection_useast1"
+}
+
+module "cur_destination" {
+  source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cur-setup-destination?ref=0.2.14"
+
+  source_account_ids = ["123456789012", "210987654321"]
+  create_cur         = false
+
+  providers = {
+    aws         = aws.data_collection
+    aws.useast1 = aws.data_collection_useast1
+  }
+}
+```
+
+### Basic Example - Source Account
+
+Creates CUR in payer account with S3 replication to the destination bucket.
+
+```terraform
+provider "aws" {
+  region = "us-west-2"
+  alias  = "payer"
+}
+
+provider "aws" {
+  region = "us-east-1"
+  alias  = "payer_useast1"
+}
+
+module "cur_source" {
+  source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cur-setup-source?ref=0.2.14"
+
+  destination_bucket_arn = module.cur_destination.cur_bucket_arn
+
+  providers = {
+    aws         = aws.payer
+    aws.useast1 = aws.payer_useast1
+  }
+}
+```
+
+### Basic Example - Dashboard Deployment
+
+Deploys QuickSight dashboards via CloudFormation wrapper.
+
+```terraform
+module "cid_dashboards" {
+  source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cid-dashboards?ref=0.2.14"
+
+  stack_name      = "Cloud-Intelligence-Dashboards"
+  template_bucket = "my-cfn-templates-bucket"
+
+  stack_parameters = {
+    "PrerequisitesQuickSight"            = "yes"
+    "PrerequisitesQuickSightPermissions" = "yes"
+    "QuickSightUser"                     = "admin/john-doe"
+    "DeployCUDOSv5"                      = "yes"
+    "DeployCostIntelligenceDashboard"    = "yes"
+    "DeployKPIDashboard"                 = "yes"
+  }
+}
+```
+
+### With Custom Resource Prefix and S3 Logging
+
+Configures custom naming and enables S3 access logging for the CUR bucket.
+
+```terraform
+module "cur_destination" {
+  source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cur-setup-destination?ref=0.2.14"
+
+  source_account_ids = ["123456789012"]
+  create_cur         = true
+  resource_prefix    = "myorg"
+  cur_name_suffix    = "billing"
+
+  s3_access_logging = {
+    enabled = true
+    bucket  = "my-logging-bucket"
+    prefix  = "cur-destination-logs/"
+  }
+
+  providers = {
+    aws         = aws.data_collection
+    aws.useast1 = aws.data_collection_useast1
+  }
+}
+```
+
+### With SPICE Refresh Schedule and IAM Permissions Boundary
+
+Enables scheduled QuickSight SPICE dataset refreshes with custom IAM configuration.
+
+```terraform
+module "cid_dashboards" {
+  source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cid-dashboards?ref=0.2.14"
+
+  stack_name      = "Cloud-Intelligence-Dashboards"
+  template_bucket = "my-cfn-templates-bucket"
+
+  stack_parameters = {
+    "PrerequisitesQuickSight"            = "yes"
+    "PrerequisitesQuickSightPermissions" = "yes"
+    "QuickSightUser"                     = "admin/jane-smith"
+    "QuickSightDataSetRefreshSchedule"   = "cron(0 6 * * ? *)"
+    "DeployCUDOSv5"                      = "yes"
+    "PermissionsBoundary"                = "arn:aws:iam::123456789012:policy/OrgBoundary"
+    "RolePath"                           = "/analytics/"
+  }
+
+  stack_tags = {
+    Environment = "production"
+    CostCenter  = "finance"
+  }
+}
 ```
 
 
-#### Update existing Dashboards
-Update only Dashboard
-```bash
-cid-cmd update
-```
-Update dashboard and all dependencies (Datasets and Athena View). WARNING: this will override any customization of SQL files and Datasets.
-```bash
-cid-cmd update --force --recursive
-```
-#### Show Dashboard Status
-Show dashboards status
 
-```bash
-cid-cmd status
-```
-[<img width="558" alt="status" src="https://github.com/aws-samples/aws-cudos-framework-deployment/assets/82834333/cae2015f-0f81-4593-80b3-c67ec1200fcd">](https://www.youtube.com/watch?v=ivr1MoGaApM)
+<!-- BEGIN_TF_DOCS -->
+## Requirements
 
+No requirements.
 
+## Providers
 
+No providers.
 
-####  Share QuickSight resources
-```bash
-cid-cmd share
-```
+## Modules
 
-#### Initialize Amazon QuickSight
-One time action to initialize Amazon QuickSight Enterprise Edition.
+No modules.
 
-```bash
-cid-cmd init-qs
-```
+## Resources
 
-#### Initialize CUR
-One time action to initialize Athena table and Crawler from s3 with CUR data.
+No resources.
 
-```bash
-cid-cmd init-cur
-```
+## Inputs
 
-#### Delete Dashboard and all dependencies unused by other
-Delete Dashboards and all dependencies unused by other CID-managed dashboards.(including QuickSight datasets, Athena views and tables)
-```bash
-cid-cmd delete
-```
+No inputs.
 
-#### Delete Command Options:
-```
- --dashboard-id TEXT QuickSight dashboard id
- --athena-database TEXT Athena database
- ```
+## Outputs
 
-#### Export
-The command `export` lets you download or share a customized dashboard with another AWS Account. It takes the QuickSight Analysis as an input and generates all the assets needed to deploy your Analysis into another AWS Account. This command will generate a yaml file with a description of the Dashboard and all required Datasets. Also this command generates a QuickSight Template in the current AWS Account that can be used for Dashboard deployment in other accounts. The resource file can be used with all other cid commands. Both accounts must have relevant Athena Views and Tables.
-
-Export from account A:
-```
-cid-cmd export
-```
-
-Deployment to account B:
-```
-cid-cmd deploy --resources ./mydashboard.yaml
-```
-
-#### See available commands and command line options
-```
-cid-cmd --help
-```
-
-#### CSV to Athena View
-Generate and SQL file for Athena View for CSV file
-
-```
-cid-cmd csv2view --input my_mapping.csv --name my_mapping
-```
-This command generates a SQL file that you can execute. Please mind [Athena Service Limit for Query Size](https://docs.aws.amazon.com/athena/latest/ug/service-limits.html#service-limits-query-string-length).
-
-
-## Cloud Formation
-CID is also provided in a form of CloudFormation templates. See detailed instructions in the [Well Architected Labs](https://wellarchitectedlabs.com/cost/200_labs/200_cloud_intelligence/cost-usage-report-dashboards/dashboards/deploy_dashboards/) site.
-
-## Terraform
-CID offers a set of Terraform modules to deploy CUR replication and CID dashboards. These modules act as a wrapper around CloudFormation.
-
-  1. Create a bucket for consolidating CUR [terraform-modules/cur-setup-destination/](terraform-modules/cur-setup-destination/)
-  2. Create a CUR in Payer Account(s) [terraform-modules/cur-setup-source/](terraform-modules/cur-setup-source/)
-  3. Create Dashboards [terraform-modules/cid-dashboards/](terraform-modules/cid-dashboards/)
-
-
-## Rights Management
-The ownership of CID is usually with the FinOps team, who do not have administrative access. However, they require specific privileges to install and operate CID dashboards. To assist the Admin team in granting the necessary privileges to the CID owners, a CFN template is provided. This template, located at [CFN template](cfn-templates/cid-admin-policies.yaml), takes an IAM role name as a parameter and adds the required policies to the role.
-
-
-## Troubleshooting and Support
-If you experience unexpected behaviour of the `cid-cmd` script please run `cid-cmd` in debug mode:
-
-```bash
-cid-cmd -vv [command]
-```
-    
-This will produce a log file in the same directory that were at the tile of launch of cid-cmd. 
-
-:heavy_exclamation_mark:Inspect the produced debug log for any sensitive information and anonymize it.
-
-We encourage you to open [new issue](https://github.com/aws-samples/aws-cudos-framework-deployment/issues/new) with description of the problem and attached debug log file.
+No outputs.
+<!-- END_TF_DOCS -->
